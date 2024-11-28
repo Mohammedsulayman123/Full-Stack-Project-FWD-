@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claimed Donations - Feeding India</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">Feeding India</div>
+            <nav>
+                <a href="ngo-dashboard.html">Available Donations</a>
+                <a href="claimed-donations.html" class="active">Claimed Donations</a>
+                <a href="history.html">History</a>
+                <a href="#profile">Profile</a>
+                <a href="login.html" class="logout">Logout</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h1>Claimed Donations</h1>
+                <div class="filter-controls">
+                    <input type="text" placeholder="Search by location..." class="search-input">
+                    <select class="filter-select">
+                        <option>All Food Types</option>
+                        <option>Meals</option>
+                        <option>Groceries</option>
+                        <option>Beverages</option>
+                    </select>
+                </div>
+            </header>
+
+            <div class="donations-grid" id="claimedDonationsGrid">
+                <!-- Claimed donations will be populated here -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const claimedGrid = document.getElementById('claimedGrid');
+            
+            function displayClaimedDonations() {
+                // Clear existing content
+                claimedGrid.innerHTML = '';
+                
+                // Get claimed donations from localStorage
+                const claimedDonations = JSON.parse(localStorage.getItem('claimedDonations') || '[]');
+                
+                claimedDonations.forEach(donation => {
+                    const card = document.createElement('div');
+                    card.className = 'donation-card';
+                    card.innerHTML = `
+                        <div class="donation-header">
+                            <h3>${donation.foodType}</h3>
+                            <span class="status">Claimed</span>
+                        </div>
+                        <div class="donation-details">
+                            <p><strong>Restaurant:</strong> ${donation.restaurant}</p>
+                            <p><strong>Location:</strong> ${donation.location}</p>
+                            <p><strong>Quantity:</strong> ${donation.quantity}</p>
+                            <p><strong>Distance:</strong> ${donation.distance}</p>
+                            <p><strong>Claimed Time:</strong> ${donation.claimedTime}</p>
+                        </div>
+                        <button onclick="completePickup('${donation.id}')" class="pickup-btn">Complete Pickup</button>
+                    `;
+                    claimedGrid.appendChild(card);
+                });
+            }
+
+            // Function to handle pickup completion
+            window.completePickup = function(donationId) {
+                // Get current lists
+                const claimedDonations = JSON.parse(localStorage.getItem('claimedDonations') || '[]');
+                const history = JSON.parse(localStorage.getItem('donationHistory') || '[]');
+
+                // Find the donation to move
+                const donationIndex = claimedDonations.findIndex(d => d.id === donationId);
+                if (donationIndex === -1) return;
+
+                // Get the donation and add pickup time
+                const donation = claimedDonations[donationIndex];
+                donation.pickedUpTime = new Date().toLocaleString();
+
+                // Add to history
+                history.push(donation);
+                localStorage.setItem('donationHistory', JSON.stringify(history));
+
+                // Remove from claimed
+                claimedDonations.splice(donationIndex, 1);
+                localStorage.setItem('claimedDonations', JSON.stringify(claimedDonations));
+
+                // Refresh the display
+                displayClaimedDonations();
+            };
+
+            // Initial display
+            displayClaimedDonations();
+        });
+    </script>
+</body>
+</html> 

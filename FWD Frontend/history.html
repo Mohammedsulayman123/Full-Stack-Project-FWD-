@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History - Feeding India</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">Feeding India</div>
+            <nav>
+                <a href="ngo-dashboard.html">Available Donations</a>
+                <a href="claimed-donations.html">Claimed Donations</a>
+                <a href="history.html" class="active">History</a>
+                <a href="#profile">Profile</a>
+                <a href="login.html" class="logout">Logout</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h1>Donation History</h1>
+                <div class="filter-controls">
+                    <input type="text" placeholder="Search by location..." class="search-input">
+                    <select class="filter-select">
+                        <option>All Food Types</option>
+                        <option>Meals</option>
+                        <option>Groceries</option>
+                        <option>Beverages</option>
+                    </select>
+                </div>
+            </header>
+
+            <div class="donations-grid" id="historyGrid">
+                <!-- History items will be populated here -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const historyGrid = document.getElementById('historyGrid');
+            
+            function displayHistory() {
+                // Clear existing content
+                historyGrid.innerHTML = '';
+                
+                // Get history from localStorage
+                const history = JSON.parse(localStorage.getItem('donationHistory') || '[]');
+
+                // Sort by pickup time, most recent first
+                history.sort((a, b) => new Date(b.pickedUpTime) - new Date(a.pickedUpTime));
+
+                history.forEach(donation => {
+                    const card = document.createElement('div');
+                    card.className = 'donation-card';
+                    card.innerHTML = `
+                        <div class="donation-header">
+                            <h3>${donation.foodType}</h3>
+                            <span class="status">Completed</span>
+                        </div>
+                        <div class="donation-details">
+                            <p><strong>Restaurant:</strong> ${donation.restaurant}</p>
+                            <p><strong>Location:</strong> ${donation.location}</p>
+                            <p><strong>Quantity:</strong> ${donation.quantity}</p>
+                            <p><strong>Distance:</strong> ${donation.distance}</p>
+                            <p><strong>Claimed Time:</strong> ${donation.claimedTime}</p>
+                            <p><strong>Picked Up Time:</strong> ${donation.pickedUpTime}</p>
+                        </div>
+                    `;
+                    historyGrid.appendChild(card);
+                });
+            }
+
+            // Initial display
+            displayHistory();
+        });
+    </script>
+</body>
+</html> 

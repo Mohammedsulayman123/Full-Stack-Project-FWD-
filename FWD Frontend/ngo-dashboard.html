@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NGO Dashboard - Feeding India</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">Feeding India</div>
+            <nav>
+                <a href="#" class="active">Available Donations</a>
+                <a href="claimed-donations.html">Claimed Donations</a>
+                <a href="#history">History</a>
+                <a href="#profile">Profile</a>
+                <a href="login.html" class="logout">Logout</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h1>Available Donations</h1>
+                <div class="filter-controls">
+                    <input type="text" placeholder="Search by location..." class="search-input" padding: 10px;>
+                    <select class="filter-select">
+                        <option>All Food Types</option>
+                        <option>Meals</option>
+                        <option>Groceries</option>
+                        <option>Beverages</option>
+                    </select>
+                </div>
+            </header>
+
+            <!-- Donation Cards Grid -->
+            <div class="donations-grid">
+                <!-- Donations will be dynamically populated here -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize available donations in localStorage if not exists
+            if (!localStorage.getItem('availableDonations')) {
+                const initialDonations = [
+                    {
+                        id: '1',
+                        foodType: 'Rice and Curry',
+                        restaurant: 'Spice Garden',
+                        location: 'MG Road, Bangalore',
+                        quantity: '50 meals',
+                        distance: '2.5 km away',
+                        timeLeft: '2 hours left'
+                    },
+                    {
+                        id: '2',
+                        foodType: 'Fried rice',
+                        restaurant: 'Utsav',
+                        location: 'Basavangudi near BMS college',
+                        quantity: '20 meals',
+                        distance: '2.5 km away',
+                        timeLeft: '2 hours left'
+                    }
+                ];
+                localStorage.setItem('availableDonations', JSON.stringify(initialDonations));
+            }
+
+            // Function to render available donations
+            function renderAvailableDonations() {
+                const availableDonations = JSON.parse(localStorage.getItem('availableDonations') || '[]');
+                const donationsGrid = document.querySelector('.donations-grid');
+                donationsGrid.innerHTML = ''; // Clear existing cards
+
+                availableDonations.forEach(donation => {
+                    const card = document.createElement('div');
+                    card.className = 'donation-card';
+                    card.innerHTML = `
+                        <div class="donation-header">
+                            <h3>${donation.foodType}</h3>
+                            <span class="time-left">${donation.timeLeft}</span>
+                        </div>
+                        <div class="donation-details">
+                            <p><strong>Restaurant:</strong> ${donation.restaurant}</p>
+                            <p><strong>Location:</strong> ${donation.location}</p>
+                            <p><strong>Quantity:</strong> ${donation.quantity}</p>
+                            <p><strong>Distance:</strong> ${donation.distance}</p>
+                        </div>
+                        <button class="btn btn-primary btn-claim" data-id="${donation.id}">Claim Donation</button>
+                    `;
+                    donationsGrid.appendChild(card);
+                });
+
+                // Add click event listeners to all claim buttons
+                const claimButtons = document.querySelectorAll('.btn-claim');
+                claimButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const donationId = this.getAttribute('data-id');
+                        claimDonation(donationId);
+                    });
+                });
+            }
+
+            // Function to handle claiming donations
+            function claimDonation(donationId) {
+                const availableDonations = JSON.parse(localStorage.getItem('availableDonations') || '[]');
+                const claimedDonations = JSON.parse(localStorage.getItem('claimedDonations') || '[]');
+
+                // Find the donation to claim
+                const donationIndex = availableDonations.findIndex(d => d.id === donationId);
+                if (donationIndex === -1) return;
+
+                const donation = availableDonations[donationIndex];
+                
+                // Add to claimed donations
+                claimedDonations.push({
+                    ...donation,
+                    claimedTime: new Date().toLocaleString()
+                });
+
+                // Remove from available donations
+                availableDonations.splice(donationIndex, 1);
+
+                // Update localStorage
+                localStorage.setItem('availableDonations', JSON.stringify(availableDonations));
+                localStorage.setItem('claimedDonations', JSON.stringify(claimedDonations));
+
+                // Re-render the available donations
+                renderAvailableDonations();
+
+                alert('Donation claimed successfully!');
+            }
+
+            // Initial render
+            renderAvailableDonations();
+        });
+    </script>
+</body>
+</html> 
